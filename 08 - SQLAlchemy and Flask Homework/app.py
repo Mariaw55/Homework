@@ -37,8 +37,29 @@ app = Flask(__name__)
 @app.route("/")
 def welcome():
     """List all available api routes."""
-    return f"Available Routes:<br/>" f"/api/v1.0/precipitation<br/>" f"/api/v1.0/stations</br>"f"/api/v1.0/tobs</br>"
+    return (f"Available Routes:<br/>"
+    f"<br/>"
+    f"<br/>"
+    f"/api/v1.0/precipitation<br/>"
+    f" - List of previous year's rainfall by date"
+    f"<br/>" 
+    f"<br/>"
+    f"/api/v1.0/stations</br>"
+    f" - List of Stations in Hawaii"
+    f"<br/>"
+    f"<br/>" 
+    f"/api/v1.0/tobs</br>"
+    f" - List of previous year's temperatures in Hawaii by date "
+    f"<br/>"
+    f"<br/>"
+    f"/api/v1.0/start</br>"
+    f" - Provides low, average, and high temperature of dates before and including the given date('YY-MM-DD' format)"
+    f"<br/>"
+    f"<br/>"
+    f"/api/v1.0/start/end</br>"
+    f" -  Provides low, average, and high temperature of date range provided<br/>")
 
+###############################################################################
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -57,7 +78,8 @@ def precipitation():
         row["prcp"] = precipitation[1]
         precipitation_total.append(row)
     return jsonify(precipitation_total)
-
+    
+########################################################################
 
 @app.route("/api/v1.0/stations")
 def stations():
@@ -67,24 +89,54 @@ def stations():
     stations_query = session.query(Station.name, Station.station)
     stations = pd.read_sql(stations_query.statement, stations_query.session.bind)
     return jsonify(stations.to_dict())
+######################################################################################
+@app.route("/api/v1.0/tobs")
+def tobs():
+    """Return temperature observations a year from August 23, 2017"""
+    session = Session(engine)
+    last_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    date_last_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+    tobs_query = session.query(Measurement.date,Measurement.tobs).filter(Measurement.date >= date_last_year).order_by(Measurement.date).all()
     
+    temperature_ly = []
+    for result in tobs_query:
+       row = {}
+       row["date"] = tobs_query[0]
+       row["tobs"] = tobs_query[1]
+       temperature_ly.append(row)
+    return jsonify(temperature_ly)
 
-   
-    # Query all passengers
-  
+######################################################################################################
 
-#     session.close()
+@app.route("/api/v1.0/<start>")
+def tripA(start):
+    """Return low, average, and high temperature of a year from start date"""
+    session = Session(engine)
+    start_date= dt.datetime.strptime(start, '%Y-%m-%d')
+    last_year = dt.timedelta(days=365)
+    start = start_date-last_year
+    end =  dt.date(2017, 8, 23)
 
-#     # Create a dictionary from the row data and append to a list of all_passengers
-#     all_passengers = []
-#     for name, age, sex in results:
-#         passenger_dict = {}
-#         passenger_dict["name"] = name
-#         passenger_dict["age"] = age
-#         passenger_dict["sex"] = sex
-#         all_passengers.append(passenger_dict)
+    trip_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    trip = list(np.ravel(trip_data))
+    return jsonify(trip)
 
-#     return jsonify(all_passengers)
+#############################################################
+
+@app.route("/api/v1.0/<start>/<end>")
+def tripB(start,end):
+    """Return low, average, and high temperature of a year from date range given"""
+    session = Session (engine)
+    start_date= dt.datetime.strptime(start, '%Y-%m-%d')
+    end_date= dt.datetime.strptime(end,'%Y-%m-%d')
+    last_year = dt.timedelta(days=365)
+    start = start_date-last_year
+    end = end_date-last_year
+    trip_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    trip = list(np.ravel(trip_data))
+    return jsonify(trip)
 
 
 if __name__ == "__main__":
