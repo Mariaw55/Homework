@@ -82,25 +82,38 @@ def scrape_info():
 
     # Scrape image urls of Mars' hemispheres
     url ="https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
-    url1 = "https://astrogeology.usgs.gov"
-    browser.get(url)
-    html = browser.page_source
-    soup = BeautifulSoup (html, 'html.parser')
-
-
-    images = soup.find_all('div', class_ ='item')
-    hemisphere_image_urls = []
-    for image in images:
-        url = image.find('a', class_='itemLink product-item')
-        href = url['href']
-        title = image.find('h3').text.strip()
+    try:
+        hemisphere_image_urls = []
+        x = 0
+        while True:
+            browser.get(url)
+            html_1 = browser.page_source
+        # Parse HTML with Beautiful Soup
+            soup_1 = BeautifulSoup(html_1, 'html.parser')
+        # link = soup_1.find('a', class_='itemLink product-item')
+            title = soup_1.find('h3').text.strip()
         
-        dict_mars_hemisphere = {"title": title, "img_url": url1 + href}
-        hemisphere_image_urls.append(dict_mars_hemisphere)
+            images = browser.find_elements_by_partial_link_text('Enhanced')
+            images[x].click()
+            x = x+1
+            html_2 = browser.page_source
+        # Parse HTML with Beautiful Soup
+            soup_2 = BeautifulSoup(html_2, 'html.parser')
+    
+            jpeg_url = soup_2.find('div', class_='downloads')
+            final_url= jpeg_url('a')[0]
+            the_url= final_url['href']
+        
+            dict_mars_hemisphere = {"title": title, "img_url": the_url}
+            hemisphere_image_urls.append(dict_mars_hemisphere)
+        
+    except Exception:
+        print("Complete")
+    
     
     #store list into data dictionary
 
-    mars_data["hemisphere_image_urls"] = hemisphere_image_urls
+    mars_data["hemispheres"] = hemisphere_image_urls
 
     browser.close
     
