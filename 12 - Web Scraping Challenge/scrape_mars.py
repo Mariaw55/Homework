@@ -50,7 +50,7 @@ def scrape_info():
         href = link['data-fancybox-href']
         title = link ['data-title']
     
-    featured_image_url = ['https://www.jpl.nasa.gov' + href]
+    featured_image_url = 'https://www.jpl.nasa.gov' + href
 
     mars_data['featured_image_url'] = featured_image_url
 
@@ -75,10 +75,10 @@ def scrape_info():
     mars_df.columns = ['Profile', 'Mars']
 
     mars_html_table = mars_df.to_html()
-    mars_html_table
+    mars_html_table = mars_html_table.replace('\n', '')
 
     #store html string to data dictionary
-    mars_data[mars_html_table] = mars_html_table
+    mars_data['mars_facts'] = mars_html_table
 
     # Scrape image urls of Mars' hemispheres
     url ="https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
@@ -91,7 +91,8 @@ def scrape_info():
         # Parse HTML with Beautiful Soup
             soup_1 = BeautifulSoup(html_1, 'html.parser')
         # link = soup_1.find('a', class_='itemLink product-item')
-            title = soup_1.find('h3').text.strip()
+            titles = soup_1.find_all('h3')
+            title = titles[x].text.strip()
         
             images = browser.find_elements_by_partial_link_text('Enhanced')
             images[x].click()
@@ -120,6 +121,7 @@ def scrape_info():
     #Return the dictionary
     return mars_data
  
+
 
 
 
