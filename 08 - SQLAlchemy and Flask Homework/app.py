@@ -37,28 +37,7 @@ app = Flask(__name__)
 @app.route("/")
 def welcome():
     """List all available api routes."""
-    return (f"Available Routes:<br/>"
-    f"<br/>"
-    f"<br/>"
-    f"/api/v1.0/precipitation<br/>"
-    f" - List of previous year's rainfall by date"
-    f"<br/>" 
-    f"<br/>"
-    f"/api/v1.0/stations</br>"
-    f" - List of Stations in Hawaii"
-    f"<br/>"
-    f"<br/>" 
-    f"/api/v1.0/tobs</br>"
-    f" - List of previous year's temperatures in Hawaii by date "
-    f"<br/>"
-    f"<br/>"
-    f"/api/v1.0/start</br>"
-    f" - Provides low, average, and high temperature of dates before and including the given date('YY-MM-DD' format)"
-    f"<br/>"
-    f"<br/>"
-    f"/api/v1.0/start/end</br>"
-    f" -  Provides low, average, and high temperature of date range provided<br/>")
-
+    
 ###############################################################################
 
 @app.route("/api/v1.0/precipitation")
