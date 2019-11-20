@@ -28,9 +28,7 @@ d3.csv("assets/data/data.csv").then(function(censusData) {
     // ==============================
     censusData.forEach(function(data) {
         data.poverty = +data.poverty;
-        data.healthcare = +data.healthcare;
-        data.age= +data.age;
-        data.ob
+        data.healthcare = +data.healthcare
       });
       
     // Step 2: Create scale functions
